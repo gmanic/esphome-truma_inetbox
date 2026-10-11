@@ -1,3 +1,5 @@
+gmanic: consolidated skrebber + bertel2020 + fafr84
+
 # ESPHome truma_inetbox component
 
 ## Changes according to ESPHome 2026.4.0
