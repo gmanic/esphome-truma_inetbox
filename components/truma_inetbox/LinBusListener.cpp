@@ -57,7 +57,14 @@ void LinBusListener::setup() {
 void LinBusListener::update() { this->check_for_lin_fault_(); }
 
 void LinBusListener::loop() {
-  if (!this->check_for_lin_fault_()) {
+#ifdef USE_ESP_IDF
+  // RX wird vom dedizierten Task auf Core 1 bedient. loop() springt nur
+  // ein, falls die Task-Erstellung fehlgeschlagen ist.
+  const bool rx_in_loop = (this->rx_task_handle_ == nullptr);
+#else
+  const bool rx_in_loop = true;
+#endif
+  if (rx_in_loop && !this->check_for_lin_fault_()) {
     if (this->available() > 0) {
       this->on_receive_();
     }
@@ -174,7 +181,7 @@ void LinBusListener::on_receive_() {
 
     const uint32_t now = micros();
     if (this->last_data_recieved_ != 0 &&
-        (now - this->last_data_recieved_) > this->time_per_lin_break_) {
+        (now - this->last_data_recieved_) > this->time_per_first_byte_) {
       this->current_state_ = READ_STATE_BREAK;
     }
 
